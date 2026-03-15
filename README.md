@@ -1,9 +1,12 @@
 # SnapText ✍️
 
+> ⚠️ **macOS uniquement** — ce projet utilise des outils spécifiques à Mac et ne fonctionne pas sur Windows ou Linux.
+
 Tu tapes les mêmes choses 100 fois par jour ? Moi aussi. C'est pour ça que j'ai construit SnapText.
+
 Tu définis un raccourci, genre `/prompt`, et dès que tu le tapes — peu importe où, dans Chrome, Notion, Word, n'importe quoi — SnapText l'efface et colle le texte complet à la place. Automatiquement, en moins d'une seconde.
 
-C'est mon premier projet Python. Je l'ai construit pour apprendre, et parce que j'en avais besoin tous les jours.
+**Je ne suis pas développeur.** Je construis des outils pour aller plus vite dans mon travail, avec l'aide de l'IA. SnapText est mon premier projet Python, construit en apprenant en faisant.
 
 ---
 
@@ -18,7 +21,7 @@ Le script tourne en arrière-plan et écoute ton clavier en permanence. Il ne s'
 ## Ce que SnapText sait faire
 
 - **Remplacer un raccourci par un texte long** — la fonction principale, et elle marche bien
-- **Hot-reload** — tu modifies tes snippets, SnapText les recharge tout seul sans que tu aies besoin de redémarrer quoi que ce soit
+- **Hot-reload** — tu modifies tes snippets, SnapText les recharge tout seul sans redémarrer
 - **Lancement automatique au démarrage** — une fois configuré, tu n'y penses plus
 
 ---
@@ -33,7 +36,7 @@ git clone https://github.com/Ugo-Ferrero/SnapText.git
 cd SnapText
 
 # Installe les dépendances
-pip install pynput pyperclip pyobjc-framework-Cocoa
+pip install -r requirements.txt
 
 # Lance le script
 python3 SnapText.py
@@ -70,14 +73,6 @@ launchctl load ~/Library/LaunchAgents/com.SnapText.plist
 
 ---
 
-## Ce que j'aimerais ajouter un jour
-
-- Une petite interface pour gérer les snippets sans ouvrir le JSON à la main
-- Des variables dynamiques comme la date ou l'heure dans les snippets
-- Pourquoi pas un support Windows/Linux
-
----
-
 ## Le projet en détail
 
 ```
@@ -86,9 +81,16 @@ SnapText/
 ├── snippets.json        # La liste des raccourcis et leurs fichiers associés
 ├── snippets/            # Les textes longs, un fichier par snippet
 ├── com.SnapText.plist   # Pour le lancement automatique au démarrage
-└── CLAUDE.md            # Mes notes de dev (j'utilise Claude Code pour m'aider à coder)
+└── CLAUDE.md            # Mes notes de dev (j'utilise Claude pour m'aider à coder)
 ```
 
 ---
 
-Construit par **Ugo Ferrero** — en apprenant, étape par étape.
+## Ce que j'aimerais ajouter un jour
+
+- Une petite interface pour gérer les snippets sans ouvrir le JSON à la main
+- Des variables dynamiques comme la date ou l'heure dans les snippets
+
+---
+
+Construit par **Ugo Ferrero** — avec l'aide de l'IA, pour aller plus vite.
