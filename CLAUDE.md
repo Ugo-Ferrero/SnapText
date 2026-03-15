@@ -1,33 +1,64 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Ce fichier sert à briefer Claude (Cowork ou Claude Code) sur le projet SnapText.
 
-## Project
+## C'est quoi SnapText ?
 
-"Mon Text Blaze" is a macOS text-expander daemon. It listens to global keyboard input, detects configured shortcuts, and replaces them with their full-text expansions (like the Text Blaze browser extension, but system-wide).
+SnapText est un outil macOS qui tourne en arrière-plan et remplace automatiquement des raccourcis clavier par des textes longs. Tu tapes `/prompt` n'importe où sur le Mac → SnapText efface le raccourci et colle le texte complet via Cmd+V.
 
-- `daemon.py` — the main process: listens to keyboard events, matches shortcuts, and pastes expansions
-- `snippets.json` — maps shortcut strings to their replacement text
-- `.venv/` — local Python virtualenv
+Inspiré de Text Blaze, construit en Python. C'est mon premier projet, je ne suis pas développeur — je construis des outils pour aller plus vite dans mon travail avec l'aide de l'IA.
 
-## Running
+## Fichiers du projet
+
+- `SnapText.py` — le script principal. Écoute le clavier avec pynput, détecte les raccourcis qui commencent par `/`, efface les caractères avec Backspace, copie le texte via pbcopy et colle avec Cmd+V
+- `snippets.json` — mapping `{"/raccourci": "nom_du_fichier.xml"}`
+- `snippets/` — dossier contenant les fichiers texte/XML de chaque snippet
+- `com.SnapText.plist` — pour lancer SnapText automatiquement au démarrage du Mac
+- `requirements.txt` — dépendances Python
+
+## Comment ça marche techniquement
+
+- `pynput.keyboard.Listener` écoute tous les keystrokes globalement
+- Un buffer (max 50 chars) accumule les touches tapées
+- Le buffer se réinitialise quand on tape `/` (nouveau raccourci potentiel)
+- À chaque touche, `verifier_buffer()` compare le buffer aux raccourcis connus
+- Sur match : `effacer_et_coller()` envoie Backspace × len(raccourci), copie via `pbcopy` (subprocess), colle via Cmd+V
+- Hot-reload : `verifier_maj_snippets()` surveille le mtime de snippets.json et recharge si modifié
+- Le remplacement tourne dans un thread séparé (pynput interdit de simuler des touches depuis son propre thread)
+
+## Lancer le projet
 
 ```bash
-# Activate venv first, or prefix with .venv/bin/python3
-.venv/bin/python3 daemon.py
+python3 SnapText.py
 ```
 
-macOS requires **Accessibility permission** for the terminal app running the daemon (System Settings → Privacy & Security → Accessibility).
+macOS requiert la permission Accessibilité pour le Terminal (Réglages Système → Confidentialité → Accessibilité).
 
-## Dependencies
+## Dépendances
 
-Install into the venv:
 ```bash
-.venv/bin/pip install pyperclip pynput
+pip install -r requirements.txt
+# pynput, pyperclip, pyobjc-framework-Cocoa
 ```
 
-## Architecture
+## Ce qu'on veut construire en V2
 
-`daemon.py` uses `pynput.keyboard.Listener` to capture all keystrokes globally. A rolling `buffer` (max 50 chars) accumulates typed characters. After each printable keystroke, `verifier_buffer()` checks if the buffer ends with any key in `snippets`. On a match, `effacer_et_coller()` sends `Backspace` × len(shortcut), copies the replacement to the clipboard via `pyperclip`, then pastes with `Cmd+V`.
+### Fonctionnalité : autocomplétion avec popup discrète
 
-Special keys: space is appended to the buffer, backspace pops it, enter/other specials clear it.
+**Comportement attendu :**
+- Quand l'utilisateur tape `/`, une petite popup discrète apparaît avec la liste de tous les snippets disponibles (affichage : juste le raccourci, ex: `/prompt`)
+- Plus l'utilisateur tape de lettres après le `/`, plus la liste se filtre (ex: `/pro` → ne montre que `/prompt`)
+- Si l'utilisateur appuie sur **Échap** ou tape autre chose → la popup disparaît silencieusement, sans déclencher de remplacement
+- Si l'utilisateur appuie sur **Entrée** ou **clique** sur un snippet → le remplacement se déclenche
+- La popup doit être **non-intrusive** : si quelqu'un tape juste `/` sans vouloir un snippet, ça ne doit pas le gêner
+
+**Contraintes techniques :**
+- On est sur macOS uniquement
+- Le script tourne en arrière-plan sans interface graphique
+- La popup doit s'afficher par-dessus toutes les autres fenêtres, au bon endroit
+- Penser à utiliser `tkinter` ou `AppKit` (pyobjc) pour la fenêtre flottante
+
+**Ce qu'il ne faut pas casser :**
+- Le hot-reload des snippets
+- Le système de remplacement existant (Backspace + pbcopy + Cmd+V)
+- La détection du buffer clavier
