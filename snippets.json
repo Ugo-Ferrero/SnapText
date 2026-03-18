@@ -1,5 +1,3 @@
 {
-  "/prompt": "prompt.xml",
-  "/videonb": "videonb.xml",
-  "/zeendoc": "master_prompt_zeendoc.xml"
+  "/prompt": "prompt.xml"
 }
