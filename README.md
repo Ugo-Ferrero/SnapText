@@ -36,7 +36,7 @@ git clone https://github.com/Ugo-Ferrero/SnapText.git
 cd SnapText
 
 # Installe les dépendances
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 
 # Lance le script
 python3 SnapText.py
